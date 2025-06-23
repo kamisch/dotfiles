@@ -1,0 +1,34 @@
+FROM alpine:latest
+
+# Install basic dependencies
+RUN apk add --no-cache \
+    sudo \
+    curl \
+    git \
+    bash \
+    zsh \
+    rsync \
+    diffutils \
+    shadow
+
+# Create a test user with sudo privileges
+RUN adduser -D -s /bin/bash testuser && \
+    echo "testuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Create shell config files for testing
+USER testuser
+WORKDIR /home/testuser
+
+RUN touch /home/testuser/.bashrc && \
+    touch /home/testuser/.zshrc && \
+    echo 'export PATH=$PATH:/usr/local/bin' >> /home/testuser/.bashrc
+
+# Copy dotfiles repo
+COPY --chown=testuser:testuser . /home/testuser/dotfiles
+
+WORKDIR /home/testuser/dotfiles
+
+# Make scripts executable
+RUN chmod +x setup.sh sync.sh
+
+CMD ["/bin/bash"]

@@ -248,10 +248,39 @@ mv ~/.config/nvim.backup ~/.config/nvim
 mv ~/.config/tmux.backup ~/.config/tmux
 ```
 
+## Testing
+
+A comprehensive test suite validates the functionality across different environments:
+
+```bash
+# Test on Ubuntu (default)
+./tests/run-tests.sh
+
+# Test on all environments
+./tests/run-tests.sh --all
+
+# Test locally (with backup/restore)
+./tests/run-tests.sh --local
+
+# Clean up Docker resources
+./tests/run-tests.sh --clean
+```
+
+### What's Tested
+- ✅ Package installation (Neovim, tmux, git)
+- ✅ Configuration deployment and integrity
+- ✅ Idempotent behavior (safe repeated runs)
+- ✅ Force flag functionality
+- ✅ Sync script bidirectional operation
+- ✅ Shell alias setup
+- ✅ Backup and restore mechanisms
+
+See [`tests/README.md`](tests/README.md) for detailed testing documentation.
+
 ## Contributing
 
 1. Make changes to your local configuration
-2. Test thoroughly
+2. Test thoroughly: `./tests/run-tests.sh --all`
 3. Sync to repository: `./sync.sh to-repo`
 4. Commit changes: `git add . && git commit -m "Description"`
 5. Push to remote: `git push`

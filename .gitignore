@@ -34,3 +34,7 @@ Thumbs.db
 # Local environment files
 .env
 .env.local
+
+# Test artifacts
+.config-test-backup-*
+test-results/
