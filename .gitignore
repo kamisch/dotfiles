@@ -1,0 +1,36 @@
+# Neovim generated files
+config/nvim/lazy-lock.json
+config/nvim/.luarc.json
+config/nvim/plugin/
+
+# Tmux plugin files (will be reinstalled)
+config/tmux/plugins/
+
+# Backup files
+*.backup
+*.backup.*
+*~
+.#*
+#*#
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# Local environment files
+.env
+.env.local
