@@ -8,6 +8,7 @@ A comprehensive Neovim and tmux configuration setup with NvChad integration and 
 - **Tmux Integration**: Seamless navigation between Neovim and tmux
 - **Cross-Platform**: Works on macOS and Linux
 - **Plugin Management**: Automated plugin installation
+- **Shell Integration**: Automatic `vim=nvim` alias setup for zsh and bash
 - **Sync Tools**: Keep repository and local configs in sync
 - **Comprehensive Documentation**: Guides and cheatsheets included
 
@@ -15,18 +16,21 @@ A comprehensive Neovim and tmux configuration setup with NvChad integration and 
 
 ```bash
 # Clone the repository
-git clone <your-repo-url> ~/dotfiles
+git clone https://github.com/kamisch/dotfiles.git ~/dotfiles
 
 # Run the setup script
 cd ~/dotfiles
 ./setup.sh
+
+# Restart your terminal to use the vim alias
+# Or reload your shell: source ~/.zshrc (or ~/.bashrc)
 
 # Start tmux and install plugins
 tmux
 # Press Ctrl+Space + I to install tmux plugins
 
 # Open Neovim to complete NvChad setup
-nvim
+vim  # Now uses nvim thanks to the alias!
 ```
 
 ## Repository Structure
@@ -71,7 +75,7 @@ sudo pacman -S neovim tmux git curl
 
 ```bash
 # Clone and setup
-git clone <your-repo-url> ~/dotfiles
+git clone https://github.com/kamisch/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ./setup.sh
 ```
@@ -81,6 +85,7 @@ The script will:
 2. Backup existing configurations
 3. Deploy new configurations
 4. Install tmux plugin manager (TPM)
+5. Setup `vim=nvim` alias in shell configurations
 
 ## Configuration Details
 
