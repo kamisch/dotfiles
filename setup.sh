@@ -82,9 +82,12 @@ fi
 install_packages() {
     log_info "Checking and installing required packages..."
     
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if [[ "$OSTYPE" == "linux-gnu"* ]] || [[ "$OSTYPE" == "linux-musl"* ]] || [[ -f /etc/alpine-release ]]; then
         log_info "Installing on Linux..."
-        if command -v apt >/dev/null 2>&1; then
+        if command -v apk >/dev/null 2>&1; then
+            sudo apk update
+            sudo apk add neovim tmux git curl
+        elif command -v apt >/dev/null 2>&1; then
             sudo apt update
             sudo apt install -y neovim tmux git curl
         elif command -v yum >/dev/null 2>&1; then

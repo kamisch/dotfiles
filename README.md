@@ -76,6 +76,11 @@ sudo apt install neovim tmux git curl
 sudo pacman -S neovim tmux git curl
 ```
 
+**Linux (Alpine):**
+```bash
+sudo apk add neovim tmux git curl
+```
+
 ### Automated Installation
 
 ```bash

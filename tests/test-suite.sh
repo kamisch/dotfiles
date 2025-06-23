@@ -88,11 +88,16 @@ count_backups() {
 test_initial_setup() {
     log_test "Testing initial setup script execution"
     
+    # Show system info for debugging
+    log_info "System info: $(cat /etc/os-release 2>/dev/null | head -2 || echo 'OS info unavailable')"
+    log_info "Package managers available: $(command -v apt apk yum pacman brew 2>/dev/null | tr '\n' ' ')"
+    
     # Run setup script for the first time
     if ./setup.sh; then
         log_pass "Setup script executed successfully"
     else
         log_fail "Setup script failed"
+        log_info "Setup script output may contain error details above"
         return 1
     fi
     
