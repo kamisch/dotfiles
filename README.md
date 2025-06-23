@@ -9,6 +9,7 @@ A comprehensive Neovim and tmux configuration setup with NvChad integration and 
 - **Cross-Platform**: Works on macOS and Linux
 - **Plugin Management**: Automated plugin installation
 - **Shell Integration**: Automatic `vim=nvim` alias setup for zsh and bash
+- **Idempotent Setup**: Run setup script multiple times safely
 - **Sync Tools**: Keep repository and local configs in sync
 - **Comprehensive Documentation**: Guides and cheatsheets included
 
@@ -21,6 +22,10 @@ git clone https://github.com/kamisch/dotfiles.git ~/dotfiles
 # Run the setup script
 cd ~/dotfiles
 ./setup.sh
+
+# The script is idempotent - you can run it multiple times safely
+# Use --force to reinstall configs even if they exist
+./setup.sh --force
 
 # Restart your terminal to use the vim alias
 # Or reload your shell: source ~/.zshrc (or ~/.bashrc)
@@ -78,14 +83,21 @@ sudo pacman -S neovim tmux git curl
 git clone https://github.com/kamisch/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ./setup.sh
+
+# Optional: Force reinstall even if configs exist
+./setup.sh --force
+
+# Get help
+./setup.sh --help
 ```
 
 The script will:
-1. Install Neovim and tmux
-2. Backup existing configurations
-3. Deploy new configurations
-4. Install tmux plugin manager (TPM)
-5. Setup `vim=nvim` alias in shell configurations
+1. Install Neovim and tmux (if not already installed)
+2. Deploy configurations (only if different or missing)
+3. Backup existing configurations before overwriting
+4. Install tmux plugin manager (TPM) if not present
+5. Setup `vim=nvim` alias in shell configurations (if not already set)
+6. Skip steps that are already completed (idempotent)
 
 ## Configuration Details
 
@@ -167,6 +179,30 @@ Keep your repository and local configs synchronized:
 
 ## Troubleshooting
 
+### Setup Script Issues
+
+1. **Setup script fails**
+   ```bash
+   # Run with more verbose output
+   bash -x ./setup.sh
+   
+   # Check help for options
+   ./setup.sh --help
+   ```
+
+2. **Configs not updating**
+   ```bash
+   # Force reinstall configurations
+   ./setup.sh --force
+   
+   # Check differences first
+   ./sync.sh diff
+   ```
+
+3. **Multiple backups accumulating**
+   - The script only backs up when configs are different
+   - Clean old backups: `rm -rf ~/.config/*.backup.*`
+
 ### Common Issues
 
 1. **Colors not displaying correctly**
@@ -192,6 +228,7 @@ Keep your repository and local configs synchronized:
 - Check the documentation in `docs/`
 - Run `:checkhealth` in Neovim
 - Use `tmux info` for tmux diagnostics
+- Run `./setup.sh --help` for setup options
 
 ## Backup and Recovery
 
