@@ -89,7 +89,14 @@ install_packages() {
             sudo apk add neovim tmux git curl
         elif command -v apt >/dev/null 2>&1; then
             sudo apt update
-            sudo apt install -y neovim tmux git curl
+            # Install newer Neovim from snap or AppImage for better compatibility
+            if command -v snap >/dev/null 2>&1; then
+                sudo snap install nvim --classic
+            else
+                # Fall back to apt version (may be older)
+                sudo apt install -y neovim
+            fi
+            sudo apt install -y tmux git curl
         elif command -v yum >/dev/null 2>&1; then
             sudo yum install -y neovim tmux git curl
         elif command -v pacman >/dev/null 2>&1; then

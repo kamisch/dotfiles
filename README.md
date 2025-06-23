@@ -224,7 +224,12 @@ Keep your repository and local configs synchronized:
    ~/.tmux/plugins/tpm/bin/install_plugins
    ```
 
-3. **Navigation between Neovim and tmux not working**
+3. **Neovim error: "attempt to index field 'uv' (a nil value)"**
+   - This occurs with older Neovim versions (< 0.10)
+   - The setup script now installs newer Neovim via snap on Ubuntu
+   - Alternatively, manually install Neovim 0.10+ from official releases
+
+4. **Navigation between Neovim and tmux not working**
    - Ensure vim-tmux-navigator is installed in both
    - Check keybinding conflicts
 
