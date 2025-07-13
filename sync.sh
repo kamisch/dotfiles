@@ -11,7 +11,19 @@ NC='\033[0m'
 
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_DIR="$HOME/.config"
+
+# Determine config paths based on OS
+if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
+    # Windows paths
+    NVIM_CONFIG_DIR="$HOME/AppData/Local/nvim"
+    TMUX_CONFIG_DIR="$HOME/.config/tmux"
+    CONFIG_DIR="$HOME/.config"  # Keep for tmux compatibility
+else
+    # Unix-like systems (Linux, macOS)
+    NVIM_CONFIG_DIR="$HOME/.config/nvim"
+    TMUX_CONFIG_DIR="$HOME/.config/tmux"
+    CONFIG_DIR="$HOME/.config"
+fi
 
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -34,21 +46,21 @@ sync_to_repo() {
     log_info "Syncing local configs to repository..."
     
     # Sync nvim config
-    if [[ -d "$CONFIG_DIR/nvim" ]]; then
-        log_info "Syncing nvim config..."
-        rsync -av --delete "$CONFIG_DIR/nvim/" "$SCRIPT_DIR/config/nvim/"
+    if [[ -d "$NVIM_CONFIG_DIR" ]]; then
+        log_info "Syncing nvim config from $NVIM_CONFIG_DIR..."
+        rsync -av --delete "$NVIM_CONFIG_DIR/" "$SCRIPT_DIR/config/nvim/"
         log_success "nvim config synced"
     else
-        log_warning "No nvim config found at $CONFIG_DIR/nvim"
+        log_warning "No nvim config found at $NVIM_CONFIG_DIR"
     fi
     
     # Sync tmux config  
-    if [[ -d "$CONFIG_DIR/tmux" ]]; then
-        log_info "Syncing tmux config..."
-        rsync -av --delete "$CONFIG_DIR/tmux/" "$SCRIPT_DIR/config/tmux/"
+    if [[ -d "$TMUX_CONFIG_DIR" ]]; then
+        log_info "Syncing tmux config from $TMUX_CONFIG_DIR..."
+        rsync -av --delete "$TMUX_CONFIG_DIR/" "$SCRIPT_DIR/config/tmux/"
         log_success "tmux config synced"
     else
-        log_warning "No tmux config found at $CONFIG_DIR/tmux"
+        log_warning "No tmux config found at $TMUX_CONFIG_DIR"
     fi
 }
 
@@ -60,35 +72,40 @@ sync_from_repo() {
     BACKUP_DIR="$HOME/.config-backup-$(date +%Y%m%d-%H%M%S)"
     
     # Backup nvim if exists
-    if [[ -d "$CONFIG_DIR/nvim" ]]; then
+    if [[ -d "$NVIM_CONFIG_DIR" ]]; then
         log_info "Backing up current nvim config..."
         mkdir -p "$BACKUP_DIR"
-        cp -r "$CONFIG_DIR/nvim" "$BACKUP_DIR/"
+        cp -r "$NVIM_CONFIG_DIR" "$BACKUP_DIR/"
     fi
     
     # Backup tmux if exists
-    if [[ -d "$CONFIG_DIR/tmux" ]]; then
+    if [[ -d "$TMUX_CONFIG_DIR" ]]; then
         log_info "Backing up current tmux config..."
         mkdir -p "$BACKUP_DIR"
-        cp -r "$CONFIG_DIR/tmux" "$BACKUP_DIR/"
+        cp -r "$TMUX_CONFIG_DIR" "$BACKUP_DIR/"
     fi
     
     if [[ -d "$BACKUP_DIR" ]]; then
         log_success "Backup created at: $BACKUP_DIR"
     fi
     
-    # Sync from repo
-    mkdir -p "$CONFIG_DIR"
+    # Sync from repo - create necessary directories based on OS
+    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
+        mkdir -p "$HOME/AppData/Local"
+        mkdir -p "$HOME/.config"
+    else
+        mkdir -p "$CONFIG_DIR"
+    fi
     
     if [[ -d "$SCRIPT_DIR/config/nvim" ]]; then
-        log_info "Syncing nvim config from repo..."
-        rsync -av --delete "$SCRIPT_DIR/config/nvim/" "$CONFIG_DIR/nvim/"
+        log_info "Syncing nvim config from repo to $NVIM_CONFIG_DIR..."
+        rsync -av --delete "$SCRIPT_DIR/config/nvim/" "$NVIM_CONFIG_DIR/"
         log_success "nvim config synced from repo"
     fi
     
     if [[ -d "$SCRIPT_DIR/config/tmux" ]]; then
-        log_info "Syncing tmux config from repo..."
-        rsync -av --delete "$SCRIPT_DIR/config/tmux/" "$CONFIG_DIR/tmux/"
+        log_info "Syncing tmux config from repo to $TMUX_CONFIG_DIR..."
+        rsync -av --delete "$SCRIPT_DIR/config/tmux/" "$TMUX_CONFIG_DIR/"
         log_success "tmux config synced from repo"
     fi
 }
@@ -99,26 +116,30 @@ show_diff() {
     
     echo
     echo "=== NVIM DIFFERENCES ==="
-    if [[ -d "$CONFIG_DIR/nvim" && -d "$SCRIPT_DIR/config/nvim" ]]; then
-        if ! diff -rq "$CONFIG_DIR/nvim" "$SCRIPT_DIR/config/nvim" >/dev/null 2>&1; then
-            diff -ru "$SCRIPT_DIR/config/nvim" "$CONFIG_DIR/nvim" || true
+    if [[ -d "$NVIM_CONFIG_DIR" && -d "$SCRIPT_DIR/config/nvim" ]]; then
+        if ! diff -rq "$NVIM_CONFIG_DIR" "$SCRIPT_DIR/config/nvim" >/dev/null 2>&1; then
+            diff -ru "$SCRIPT_DIR/config/nvim" "$NVIM_CONFIG_DIR" || true
         else
             log_success "nvim configs are identical"
         fi
     else
         log_warning "Cannot compare nvim configs - one or both directories missing"
+        log_info "Local nvim config: $NVIM_CONFIG_DIR"
+        log_info "Repo nvim config: $SCRIPT_DIR/config/nvim"
     fi
     
     echo
     echo "=== TMUX DIFFERENCES ==="
-    if [[ -d "$CONFIG_DIR/tmux" && -d "$SCRIPT_DIR/config/tmux" ]]; then
-        if ! diff -rq "$CONFIG_DIR/tmux" "$SCRIPT_DIR/config/tmux" >/dev/null 2>&1; then
-            diff -ru "$SCRIPT_DIR/config/tmux" "$CONFIG_DIR/tmux" || true
+    if [[ -d "$TMUX_CONFIG_DIR" && -d "$SCRIPT_DIR/config/tmux" ]]; then
+        if ! diff -rq "$TMUX_CONFIG_DIR" "$SCRIPT_DIR/config/tmux" >/dev/null 2>&1; then
+            diff -ru "$SCRIPT_DIR/config/tmux" "$TMUX_CONFIG_DIR" || true
         else
             log_success "tmux configs are identical"
         fi
     else
         log_warning "Cannot compare tmux configs - one or both directories missing"
+        log_info "Local tmux config: $TMUX_CONFIG_DIR"
+        log_info "Repo tmux config: $SCRIPT_DIR/config/tmux"
     fi
 }
 

@@ -1,20 +1,21 @@
 # Dotfiles
 
-A comprehensive Neovim and tmux configuration setup with NvChad integration and seamless cross-platform installation.
+A comprehensive Neovim and tmux configuration setup with NvChad integration and seamless cross-platform installation for macOS, Linux, and Windows.
 
 ## Features
 
 - **NvChad Configuration**: Modern Neovim setup with Catppuccin theme
 - **Tmux Integration**: Seamless navigation between Neovim and tmux
-- **Cross-Platform**: Works on macOS and Linux
+- **Cross-Platform**: Works on macOS, Linux, and Windows
 - **Plugin Management**: Automated plugin installation
-- **Shell Integration**: Automatic `vim=nvim` alias setup for zsh and bash
+- **Shell Integration**: Automatic `vim=nvim` alias setup for zsh, bash, and PowerShell
 - **Idempotent Setup**: Run setup script multiple times safely
 - **Sync Tools**: Keep repository and local configs in sync
 - **Comprehensive Documentation**: Guides and cheatsheets included
 
 ## Quick Start
 
+### Linux/macOS
 ```bash
 # Clone the repository
 git clone https://github.com/kamisch/dotfiles.git ~/dotfiles
@@ -38,11 +39,44 @@ tmux
 vim  # Now uses nvim thanks to the alias!
 ```
 
+### Windows
+
+#### Option 1: PowerShell (Recommended)
+```powershell
+# Clone the repository
+git clone https://github.com/kamisch/dotfiles.git $env:USERPROFILE\dotfiles
+
+# Run the PowerShell setup script
+cd $env:USERPROFILE\dotfiles
+.\setup.ps1
+
+# Use -Force to reinstall configs even if they exist
+.\setup.ps1 -Force
+
+# Restart PowerShell to use the vim alias
+# Open Neovim to complete NvChad setup
+vim  # Now uses nvim thanks to the alias!
+```
+
+#### Option 2: Git Bash/WSL
+```bash
+# Clone the repository
+git clone https://github.com/kamisch/dotfiles.git ~/dotfiles
+
+# Run the setup script (works in Git Bash, WSL, or MSYS2)
+cd ~/dotfiles
+./setup.sh
+
+# Open Neovim to complete NvChad setup
+vim  # Now uses nvim thanks to the alias!
+```
+
 ## Repository Structure
 
 ```
 dotfiles/
-├── setup.sh              # Main installation script
+├── setup.sh              # Main installation script (Linux/macOS/Windows)
+├── setup.ps1             # PowerShell installation script (Windows)
 ├── sync.sh               # Sync local configs with repo
 ├── config/
 │   ├── nvim/             # NvChad configuration
@@ -59,6 +93,15 @@ dotfiles/
 ### Prerequisites
 
 The setup script will install these automatically, but you can install them manually:
+
+**Windows:**
+```powershell
+# Using winget (Windows 10 1709+ / Windows 11)
+winget install Neovim.Neovim Git.Git
+
+# Using Chocolatey
+choco install neovim git -y
+```
 
 **macOS:**
 ```bash
@@ -83,6 +126,7 @@ sudo apk add neovim tmux git curl
 
 ### Automated Installation
 
+#### Linux/macOS
 ```bash
 # Clone and setup
 git clone https://github.com/kamisch/dotfiles.git ~/dotfiles
@@ -96,12 +140,34 @@ cd ~/dotfiles
 ./setup.sh --help
 ```
 
+#### Windows
+```powershell
+# Clone and setup (PowerShell)
+git clone https://github.com/kamisch/dotfiles.git $env:USERPROFILE\dotfiles
+cd $env:USERPROFILE\dotfiles
+.\setup.ps1
+
+# Optional: Force reinstall even if configs exist
+.\setup.ps1 -Force
+
+# Get help
+.\setup.ps1 -Help
+```
+
+Or use the bash script in Git Bash/WSL:
+```bash
+# Clone and setup (Git Bash/WSL)
+git clone https://github.com/kamisch/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+./setup.sh --force  # Windows paths handled automatically
+```
+
 The script will:
-1. Install Neovim and tmux (if not already installed)
-2. Deploy configurations (only if different or missing)
+1. Install Neovim and tmux/Git (if not already installed)
+2. Deploy configurations to appropriate OS paths (only if different or missing)
 3. Backup existing configurations before overwriting
-4. Install tmux plugin manager (TPM) if not present
-5. Setup `vim=nvim` alias in shell configurations (if not already set)
+4. Install tmux plugin manager (TPM) if present and tmux available
+5. Setup `vim=nvim` alias in shell configurations (bash/zsh/PowerShell)
 6. Skip steps that are already completed (idempotent)
 
 ## Configuration Details
@@ -187,6 +253,8 @@ Keep your repository and local configs synchronized:
 ### Setup Script Issues
 
 1. **Setup script fails**
+   
+   Linux/macOS:
    ```bash
    # Run with more verbose output
    bash -x ./setup.sh
@@ -194,8 +262,20 @@ Keep your repository and local configs synchronized:
    # Check help for options
    ./setup.sh --help
    ```
+   
+   Windows (PowerShell):
+   ```powershell
+   # Check help for options
+   .\setup.ps1 -Help
+   
+   # Run with detailed error information
+   $ErrorActionPreference = "Stop"
+   .\setup.ps1
+   ```
 
 2. **Configs not updating**
+   
+   Linux/macOS:
    ```bash
    # Force reinstall configurations
    ./setup.sh --force
@@ -203,10 +283,20 @@ Keep your repository and local configs synchronized:
    # Check differences first
    ./sync.sh diff
    ```
+   
+   Windows:
+   ```powershell
+   # Force reinstall configurations
+   .\setup.ps1 -Force
+   
+   # Check differences (in Git Bash/WSL)
+   ./sync.sh diff
+   ```
 
 3. **Multiple backups accumulating**
    - The script only backs up when configs are different
-   - Clean old backups: `rm -rf ~/.config/*.backup.*`
+   - Linux/macOS: `rm -rf ~/.config/*.backup.*`
+   - Windows: `Remove-Item -Recurse $env:LOCALAPPDATA\nvim.backup.*`
 
 ### Common Issues
 
@@ -232,13 +322,20 @@ Keep your repository and local configs synchronized:
 4. **Navigation between Neovim and tmux not working**
    - Ensure vim-tmux-navigator is installed in both
    - Check keybinding conflicts
+   - On Windows: tmux may not be available, use Windows Terminal tabs instead
+
+5. **Windows-specific issues**
+   - **PowerShell execution policy**: Run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+   - **winget not found**: Update Windows or install App Installer from Microsoft Store
+   - **vim alias not working**: Restart PowerShell or reload profile with `. $PROFILE`
+   - **File paths with spaces**: Use quotes: `nvim "C:\path with spaces\file.txt"`
 
 ### Getting Help
 
 - Check the documentation in `docs/`
 - Run `:checkhealth` in Neovim
 - Use `tmux info` for tmux diagnostics
-- Run `./setup.sh --help` for setup options
+- Run `./setup.sh --help` or `.\setup.ps1 -Help` for setup options
 
 ## Backup and Recovery
 
@@ -246,16 +343,33 @@ Keep your repository and local configs synchronized:
 The setup script automatically backs up existing configurations to `~/.config-backup-TIMESTAMP`
 
 ### Manual Backup
+
+Linux/macOS:
 ```bash
 cp -r ~/.config/nvim ~/.config/nvim.backup
 cp -r ~/.config/tmux ~/.config/tmux.backup
 ```
 
+Windows (PowerShell):
+```powershell
+Copy-Item -Recurse $env:LOCALAPPDATA\nvim $env:LOCALAPPDATA\nvim.backup
+Copy-Item -Recurse $env:USERPROFILE\.config\tmux $env:USERPROFILE\.config\tmux.backup
+```
+
 ### Recovery
+
+Linux/macOS:
 ```bash
 # Restore from backup
 mv ~/.config/nvim.backup ~/.config/nvim
 mv ~/.config/tmux.backup ~/.config/tmux
+```
+
+Windows (PowerShell):
+```powershell
+# Restore from backup
+Move-Item $env:LOCALAPPDATA\nvim.backup $env:LOCALAPPDATA\nvim
+Move-Item $env:USERPROFILE\.config\tmux.backup $env:USERPROFILE\.config\tmux
 ```
 
 ## Testing
