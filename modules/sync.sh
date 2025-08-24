@@ -25,6 +25,10 @@ else
     CONFIG_DIR="$HOME/.config"
 fi
 
+# Shell config files
+ZSHRC_FILE="$HOME/.zshrc"
+BASHRC_FILE="$HOME/.bashrc"
+
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -62,6 +66,25 @@ sync_to_repo() {
     else
         log_warning "No tmux config found at $TMUX_CONFIG_DIR"
     fi
+    
+    # Sync shell configs
+    mkdir -p "$SCRIPT_DIR/shell"
+    
+    if [[ -f "$ZSHRC_FILE" ]]; then
+        log_info "Syncing .zshrc from $ZSHRC_FILE..."
+        cp "$ZSHRC_FILE" "$SCRIPT_DIR/shell/.zshrc"
+        log_success ".zshrc synced"
+    else
+        log_warning "No .zshrc found at $ZSHRC_FILE"
+    fi
+    
+    if [[ -f "$BASHRC_FILE" ]]; then
+        log_info "Syncing .bashrc from $BASHRC_FILE..."
+        cp "$BASHRC_FILE" "$SCRIPT_DIR/shell/.bashrc"
+        log_success ".bashrc synced"
+    else
+        log_warning "No .bashrc found at $BASHRC_FILE"
+    fi
 }
 
 # Function to sync from repo to local config
@@ -83,6 +106,19 @@ sync_from_repo() {
         log_info "Backing up current tmux config..."
         mkdir -p "$BACKUP_DIR"
         cp -r "$TMUX_CONFIG_DIR" "$BACKUP_DIR/"
+    fi
+    
+    # Backup shell configs if they exist
+    if [[ -f "$ZSHRC_FILE" ]]; then
+        log_info "Backing up current .zshrc..."
+        mkdir -p "$BACKUP_DIR"
+        cp "$ZSHRC_FILE" "$BACKUP_DIR/.zshrc"
+    fi
+    
+    if [[ -f "$BASHRC_FILE" ]]; then
+        log_info "Backing up current .bashrc..."
+        mkdir -p "$BACKUP_DIR"
+        cp "$BASHRC_FILE" "$BACKUP_DIR/.bashrc"
     fi
     
     if [[ -d "$BACKUP_DIR" ]]; then
@@ -107,6 +143,19 @@ sync_from_repo() {
         log_info "Syncing tmux config from repo to $TMUX_CONFIG_DIR..."
         rsync -av --delete "$SCRIPT_DIR/config/tmux/" "$TMUX_CONFIG_DIR/"
         log_success "tmux config synced from repo"
+    fi
+    
+    # Sync shell configs from repo
+    if [[ -f "$SCRIPT_DIR/shell/.zshrc" ]]; then
+        log_info "Syncing .zshrc from repo to $ZSHRC_FILE..."
+        cp "$SCRIPT_DIR/shell/.zshrc" "$ZSHRC_FILE"
+        log_success ".zshrc synced from repo"
+    fi
+    
+    if [[ -f "$SCRIPT_DIR/shell/.bashrc" ]]; then
+        log_info "Syncing .bashrc from repo to $BASHRC_FILE..."
+        cp "$SCRIPT_DIR/shell/.bashrc" "$BASHRC_FILE"
+        log_success ".bashrc synced from repo"
     fi
 }
 
@@ -141,6 +190,34 @@ show_diff() {
         log_info "Local tmux config: $TMUX_CONFIG_DIR"
         log_info "Repo tmux config: $SCRIPT_DIR/config/tmux"
     fi
+    
+    echo
+    echo "=== ZSHRC DIFFERENCES ==="
+    if [[ -f "$ZSHRC_FILE" && -f "$SCRIPT_DIR/shell/.zshrc" ]]; then
+        if ! diff -q "$ZSHRC_FILE" "$SCRIPT_DIR/shell/.zshrc" >/dev/null 2>&1; then
+            diff -u "$SCRIPT_DIR/shell/.zshrc" "$ZSHRC_FILE" || true
+        else
+            log_success ".zshrc configs are identical"
+        fi
+    else
+        log_warning "Cannot compare .zshrc configs - one or both files missing"
+        log_info "Local .zshrc: $ZSHRC_FILE"
+        log_info "Repo .zshrc: $SCRIPT_DIR/shell/.zshrc"
+    fi
+    
+    echo
+    echo "=== BASHRC DIFFERENCES ==="
+    if [[ -f "$BASHRC_FILE" && -f "$SCRIPT_DIR/shell/.bashrc" ]]; then
+        if ! diff -q "$BASHRC_FILE" "$SCRIPT_DIR/shell/.bashrc" >/dev/null 2>&1; then
+            diff -u "$SCRIPT_DIR/shell/.bashrc" "$BASHRC_FILE" || true
+        else
+            log_success ".bashrc configs are identical"
+        fi
+    else
+        log_warning "Cannot compare .bashrc configs - one or both files missing"
+        log_info "Local .bashrc: $BASHRC_FILE"
+        log_info "Repo .bashrc: $SCRIPT_DIR/shell/.bashrc"
+    fi
 }
 
 # Function to check git status if in git repo
@@ -161,7 +238,7 @@ check_git_status() {
 
 # Show help
 show_help() {
-    echo "Dotfiles Sync Script"
+    echo "Dotfiles Sync Script (nvim + tmux + shell)"
     echo ""
     echo "Usage: $0 [COMMAND]"
     echo ""
@@ -171,6 +248,12 @@ show_help() {
     echo "  diff        Show differences between local and repo configs"
     echo "  status      Show git status (if in git repository)"
     echo "  help        Show this help message"
+    echo ""
+    echo "Syncs:"
+    echo "  • nvim config directory"
+    echo "  • tmux config directory"
+    echo "  • .zshrc file"
+    echo "  • .bashrc file"
     echo ""
     echo "Examples:"
     echo "  $0 to-repo      # Update repo with your local changes"
