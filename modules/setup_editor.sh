@@ -63,6 +63,7 @@ show_help() {
     echo ""
     echo "This script will:"
     echo "  - Install Neovim and tmux (Linux/macOS)"
+    echo "  - Install Nerd Fonts for proper icon display"
     echo "  - Deploy configurations (only if different or missing)"
     echo "  - Setup tmux plugin manager"
     echo "  - Add vim=nvim alias to shell configs (bash/zsh)"
@@ -229,6 +230,123 @@ deploy_configs() {
     fi
 }
 
+# Install Nerd Fonts function
+install_nerd_fonts() {
+    log_info "Installing Nerd Fonts..."
+    
+    local fonts_dir
+    local fonts_installed=false
+    
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        fonts_dir="$HOME/Library/Fonts"
+        mkdir -p "$fonts_dir"
+        
+        # Install via Homebrew if available (easier method)
+        if command -v brew >/dev/null 2>&1; then
+            log_info "Installing Nerd Fonts via Homebrew..."
+            # Install popular Nerd Fonts
+            local nerd_fonts=(
+                "font-jetbrains-mono-nerd-font"
+                "font-fira-code-nerd-font" 
+                "font-hack-nerd-font"
+                "font-meslo-lg-nerd-font"
+                "font-source-code-pro-nerd-font"
+            )
+            
+            # Add font cask if not already added
+            if ! brew tap | grep -q "homebrew/cask-fonts"; then
+                brew tap homebrew/cask-fonts
+            fi
+            
+            for font in "${nerd_fonts[@]}"; do
+                if ! brew list --cask | grep -q "$font"; then
+                    log_info "Installing $font..."
+                    brew install --cask "$font"
+                    fonts_installed=true
+                else
+                    log_success "$font already installed"
+                fi
+            done
+        else
+            # Fallback to manual installation
+            install_fonts_manually "$fonts_dir"
+        fi
+        
+    else
+        # Linux
+        fonts_dir="$HOME/.local/share/fonts"
+        mkdir -p "$fonts_dir"
+        install_fonts_manually "$fonts_dir"
+    fi
+    
+    if [[ "$fonts_installed" == true ]] || [[ -n "$(find "$fonts_dir" -name "*Nerd*" -type f 2>/dev/null)" ]]; then
+        # Refresh font cache on Linux
+        if [[ "$OSTYPE" != "darwin"* ]] && command -v fc-cache >/dev/null 2>&1; then
+            log_info "Refreshing font cache..."
+            fc-cache -fv >/dev/null 2>&1
+        fi
+        log_success "Nerd Fonts installation completed"
+        log_info "Restart your terminal and set your terminal font to a Nerd Font"
+        log_info "Recommended fonts: JetBrainsMono Nerd Font, FiraCode Nerd Font, or Hack Nerd Font"
+    else
+        log_warning "No Nerd Fonts detected. You may need to install them manually."
+    fi
+}
+
+# Helper function for manual font installation
+install_fonts_manually() {
+    local fonts_dir=$1
+    local temp_dir="/tmp/nerd-fonts-install"
+    
+    # Popular Nerd Fonts to install
+    local font_downloads=(
+        "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/JetBrainsMono.zip"
+        "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/FiraCode.zip"
+        "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/Hack.zip"
+        "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/Meslo.zip"
+    )
+    
+    # Check if any Nerd Fonts are already installed
+    if find "$fonts_dir" -name "*Nerd*" -type f | grep -q .; then
+        log_success "Nerd Fonts already installed"
+        return 0
+    fi
+    
+    log_info "Downloading and installing Nerd Fonts manually..."
+    mkdir -p "$temp_dir"
+    
+    local fonts_downloaded=false
+    
+    for font_url in "${font_downloads[@]}"; do
+        local font_name=$(basename "$font_url" .zip)
+        local zip_file="$temp_dir/$font_name.zip"
+        
+        log_info "Downloading $font_name Nerd Font..."
+        if curl -L -f -o "$zip_file" "$font_url" 2>/dev/null; then
+            log_info "Extracting $font_name..."
+            if command -v unzip >/dev/null 2>&1; then
+                unzip -q -j "$zip_file" "*.ttf" "*.otf" -d "$fonts_dir" 2>/dev/null || true
+                fonts_downloaded=true
+                log_success "$font_name installed"
+            else
+                log_warning "unzip not available, skipping $font_name"
+            fi
+        else
+            log_warning "Failed to download $font_name"
+        fi
+    done
+    
+    # Cleanup
+    rm -rf "$temp_dir"
+    
+    if [[ "$fonts_downloaded" == false ]]; then
+        log_warning "Could not download fonts automatically. Please install manually:"
+        log_info "Visit: https://github.com/ryanoasis/nerd-fonts/releases"
+        log_info "Download a font zip, extract TTF/OTF files to: $fonts_dir"
+    fi
+}
+
 # Install TPM function
 install_tpm() {
     if [[ ! -d "$HOME/.tmux/plugins/tpm" ]]; then
@@ -295,6 +413,7 @@ main() {
     log_info "Starting dotfiles setup..."
     
     install_packages
+    install_nerd_fonts
     deploy_configs
     install_tpm
     setup_shell_aliases
@@ -303,10 +422,12 @@ main() {
     log_success "Installation completed successfully!"
     echo ""
     log_info "Next steps:"
-    echo "  1. Start tmux and press Ctrl+Space + I to install plugins"
-    echo "  2. Open nvim to complete NvChad setup"
-    echo "  3. Restart your terminal or run 'source ~/.zshrc' to use 'vim' alias"
-    echo "  4. If you installed nvim via Snap, the PATH has been configured automatically"
+    echo "  1. Restart your terminal to load new fonts"
+    echo "  2. Set your terminal font to a Nerd Font (e.g., 'JetBrainsMono Nerd Font')"
+    echo "  3. Start tmux and press Ctrl+Space + I to install plugins"
+    echo "  4. Open nvim to complete NvChad setup"
+    echo "  5. Run 'source ~/.zshrc' to use 'vim' alias"
+    echo "  6. If you installed nvim via Snap, the PATH has been configured automatically"
     echo ""
     log_info "The setup script can be run multiple times safely."
     
@@ -319,6 +440,19 @@ main() {
         log_warning "nvim command not found in current session"
         log_info "Try: source ~/.zshrc (or restart your terminal)"
     fi
+    
+    # Font installation reminder
+    echo ""
+    log_info "Font Configuration:"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "  - Fonts installed to: ~/Library/Fonts"
+        echo "  - Configure your terminal: Terminal.app → Preferences → Profiles → Font"
+    else
+        echo "  - Fonts installed to: ~/.local/share/fonts" 
+        echo "  - Configure your terminal font settings to use a Nerd Font"
+    fi
+    echo "  - Recommended: JetBrainsMono Nerd Font, FiraCode Nerd Font, or Hack Nerd Font"
+    echo "  - Font size: 12-14pt for optimal readability"
 }
 
 # Run main function
