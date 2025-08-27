@@ -241,38 +241,7 @@ install_nerd_fonts() {
         # macOS
         fonts_dir="$HOME/Library/Fonts"
         mkdir -p "$fonts_dir"
-        
-        # Install via Homebrew if available (easier method)
-        if command -v brew >/dev/null 2>&1; then
-            log_info "Installing Nerd Fonts via Homebrew..."
-            # Install popular Nerd Fonts
-            local nerd_fonts=(
-                "font-jetbrains-mono-nerd-font"
-                "font-fira-code-nerd-font" 
-                "font-hack-nerd-font"
-                "font-meslo-lg-nerd-font"
-                "font-source-code-pro-nerd-font"
-            )
-            
-            # Add font cask if not already added
-            if ! brew tap | grep -q "homebrew/cask-fonts"; then
-                brew tap homebrew/cask-fonts
-            fi
-            
-            for font in "${nerd_fonts[@]}"; do
-                if ! brew list --cask | grep -q "$font"; then
-                    log_info "Installing $font..."
-                    brew install --cask "$font"
-                    fonts_installed=true
-                else
-                    log_success "$font already installed"
-                fi
-            done
-        else
-            # Fallback to manual installation
-            install_fonts_manually "$fonts_dir"
-        fi
-        
+        install_fonts_manually "$fonts_dir"
     else
         # Linux
         fonts_dir="$HOME/.local/share/fonts"
