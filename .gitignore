@@ -1,10 +1,10 @@
 # Neovim generated files
-config/nvim/lazy-lock.json
-config/nvim/.luarc.json
-config/nvim/plugin/
+module/config/nvim/lazy-lock.json
+module/config/nvim/.luarc.json
+module/config/nvim/plugin/
 
 # Tmux plugin files (will be reinstalled)
-config/tmux/plugins/
+module/config/tmux/plugins/
 
 # Backup files
 *.backup
