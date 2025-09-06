@@ -43,7 +43,7 @@ main() {
     sleep 1
     
     # Just run Claude Code directly
-    claude code
+    claude
 }
 
 # Run main function

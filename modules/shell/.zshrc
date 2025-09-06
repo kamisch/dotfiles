@@ -94,3 +94,6 @@ alias vim=nvim
 
 # Snap binaries PATH
 export PATH="/snap/bin:$PATH"
+
+# Add local bin
+export PATH="$HOME/.local/bin:$PATH"
