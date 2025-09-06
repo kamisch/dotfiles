@@ -17,11 +17,13 @@ if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]
     # Windows paths
     NVIM_CONFIG_DIR="$HOME/AppData/Local/nvim"
     TMUX_CONFIG_DIR="$HOME/.config/tmux"
+    CLAUDE_CONFIG_DIR="$HOME/.claude"
     CONFIG_DIR="$HOME/.config"  # Keep for tmux compatibility
 else
     # Unix-like systems (Linux, macOS)
     NVIM_CONFIG_DIR="$HOME/.config/nvim"
     TMUX_CONFIG_DIR="$HOME/.config/tmux"
+    CLAUDE_CONFIG_DIR="$HOME/.claude"
     CONFIG_DIR="$HOME/.config"
 fi
 
@@ -67,6 +69,30 @@ sync_to_repo() {
         log_warning "No tmux config found at $TMUX_CONFIG_DIR"
     fi
     
+    # Sync claude config
+    if [[ -d "$CLAUDE_CONFIG_DIR" ]]; then
+        log_info "Syncing claude config from $CLAUDE_CONFIG_DIR..."
+        mkdir -p "$SCRIPT_DIR/config/claude"
+        
+        # Sync specific files and directories we care about
+        if [[ -f "$CLAUDE_CONFIG_DIR/claude.md" ]]; then
+            cp "$CLAUDE_CONFIG_DIR/claude.md" "$SCRIPT_DIR/config/claude/"
+        fi
+        if [[ -f "$CLAUDE_CONFIG_DIR/settings.local.json" ]]; then
+            cp "$CLAUDE_CONFIG_DIR/settings.local.json" "$SCRIPT_DIR/config/claude/"
+        fi
+        if [[ -d "$CLAUDE_CONFIG_DIR/commands" ]]; then
+            rsync -av --delete "$CLAUDE_CONFIG_DIR/commands/" "$SCRIPT_DIR/config/claude/commands/"
+        fi
+        if [[ -d "$CLAUDE_CONFIG_DIR/plugins" ]]; then
+            rsync -av --delete "$CLAUDE_CONFIG_DIR/plugins/" "$SCRIPT_DIR/config/claude/plugins/"
+        fi
+        
+        log_success "claude config synced"
+    else
+        log_warning "No claude config found at $CLAUDE_CONFIG_DIR"
+    fi
+    
     # Sync shell configs
     mkdir -p "$SCRIPT_DIR/shell"
     
@@ -108,6 +134,13 @@ sync_from_repo() {
         cp -r "$TMUX_CONFIG_DIR" "$BACKUP_DIR/"
     fi
     
+    # Backup claude if exists
+    if [[ -d "$CLAUDE_CONFIG_DIR" ]]; then
+        log_info "Backing up current claude config..."
+        mkdir -p "$BACKUP_DIR"
+        cp -r "$CLAUDE_CONFIG_DIR" "$BACKUP_DIR/"
+    fi
+    
     # Backup shell configs if they exist
     if [[ -f "$ZSHRC_FILE" ]]; then
         log_info "Backing up current .zshrc..."
@@ -143,6 +176,28 @@ sync_from_repo() {
         log_info "Syncing tmux config from repo to $TMUX_CONFIG_DIR..."
         rsync -av --delete "$SCRIPT_DIR/config/tmux/" "$TMUX_CONFIG_DIR/"
         log_success "tmux config synced from repo"
+    fi
+    
+    # Sync claude config from repo
+    if [[ -d "$SCRIPT_DIR/config/claude" ]]; then
+        log_info "Syncing claude config from repo to $CLAUDE_CONFIG_DIR..."
+        mkdir -p "$CLAUDE_CONFIG_DIR"
+        
+        # Sync specific files and directories
+        if [[ -f "$SCRIPT_DIR/config/claude/claude.md" ]]; then
+            cp "$SCRIPT_DIR/config/claude/claude.md" "$CLAUDE_CONFIG_DIR/"
+        fi
+        if [[ -f "$SCRIPT_DIR/config/claude/settings.local.json" ]]; then
+            cp "$SCRIPT_DIR/config/claude/settings.local.json" "$CLAUDE_CONFIG_DIR/"
+        fi
+        if [[ -d "$SCRIPT_DIR/config/claude/commands" ]]; then
+            rsync -av --delete "$SCRIPT_DIR/config/claude/commands/" "$CLAUDE_CONFIG_DIR/commands/"
+        fi
+        if [[ -d "$SCRIPT_DIR/config/claude/plugins" ]]; then
+            rsync -av --delete "$SCRIPT_DIR/config/claude/plugins/" "$CLAUDE_CONFIG_DIR/plugins/"
+        fi
+        
+        log_success "claude config synced from repo"
     fi
     
     # Sync shell configs from repo
@@ -218,6 +273,20 @@ show_diff() {
         log_info "Local .bashrc: $BASHRC_FILE"
         log_info "Repo .bashrc: $SCRIPT_DIR/shell/.bashrc"
     fi
+    
+    echo
+    echo "=== CLAUDE DIFFERENCES ==="
+    if [[ -d "$CLAUDE_CONFIG_DIR" && -d "$SCRIPT_DIR/config/claude" ]]; then
+        if ! diff -rq "$CLAUDE_CONFIG_DIR" "$SCRIPT_DIR/config/claude" >/dev/null 2>&1; then
+            diff -ru "$SCRIPT_DIR/config/claude" "$CLAUDE_CONFIG_DIR" || true
+        else
+            log_success "claude configs are identical"
+        fi
+    else
+        log_warning "Cannot compare claude configs - one or both directories missing"
+        log_info "Local claude config: $CLAUDE_CONFIG_DIR"
+        log_info "Repo claude config: $SCRIPT_DIR/config/claude"
+    fi
 }
 
 # Function to check git status if in git repo
@@ -238,7 +307,7 @@ check_git_status() {
 
 # Show help
 show_help() {
-    echo "Dotfiles Sync Script (nvim + tmux + shell)"
+    echo "Dotfiles Sync Script (nvim + tmux + claude + shell)"
     echo ""
     echo "Usage: $0 [COMMAND]"
     echo ""
@@ -252,6 +321,7 @@ show_help() {
     echo "Syncs:"
     echo "  • nvim config directory"
     echo "  • tmux config directory"
+    echo "  • claude config directory (settings, commands, plugins)"
     echo "  • .zshrc file"
     echo "  • .bashrc file"
     echo ""
