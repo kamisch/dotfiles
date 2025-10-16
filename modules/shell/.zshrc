@@ -97,3 +97,11 @@ export PATH="/snap/bin:$PATH"
 
 # Add local bin
 export PATH="$HOME/.local/bin:$PATH"
+
+# opencode
+export PATH=/Users/kamisch/.opencode/bin:$PATH
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/kamisch/.cache/lm-studio/bin"
+# End of LM Studio CLI section
+

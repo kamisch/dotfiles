@@ -163,3 +163,8 @@ alias vim=nvim
 
 # Snap binaries PATH
 export PATH="/snap/bin:$PATH"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/kamisch/.cache/lm-studio/bin"
+# End of LM Studio CLI section
+
