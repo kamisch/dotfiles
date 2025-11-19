@@ -1,10 +1,10 @@
 {
-  "claude-code-workflows": {
+  "anthropic-agent-skills": {
     "source": {
-      "source": "git",
-      "url": "https://github.com/wshobson/agents.git"
+      "source": "github",
+      "repo": "anthropics/skills"
     },
-    "installLocation": "/Users/kamisch/.claude/plugins/marketplaces/claude-code-workflows",
-    "lastUpdated": "2025-10-11T17:19:07.966Z"
+    "installLocation": "/Users/kamisch/.claude/plugins/marketplaces/anthropic-agent-skills",
+    "lastUpdated": "2025-10-24T00:17:33.271Z"
   }
 }
