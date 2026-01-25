@@ -111,7 +111,16 @@ install_packages() {
         log_info "Installing on Linux..."
         if command -v apk >/dev/null 2>&1; then
             sudo apk update
-            sudo apk add neovim tmux git curl
+            sudo apk add neovim tmux git curl unzip fontconfig
+        elif command -v dnf >/dev/null 2>&1; then
+            # Fedora / RHEL 8+ / CentOS Stream
+            log_info "Detected Fedora/RHEL-based system (dnf)..."
+            sudo dnf install -y neovim tmux git curl unzip fontconfig
+        elif command -v yum >/dev/null 2>&1; then
+            # Older RHEL / CentOS 7
+            log_info "Detected legacy RHEL/CentOS system (yum)..."
+            sudo yum install -y epel-release || true
+            sudo yum install -y neovim tmux git curl unzip fontconfig
         elif command -v apt >/dev/null 2>&1; then
             sudo apt update
             # Install newer Neovim from snap for better compatibility
@@ -128,13 +137,9 @@ install_packages() {
                 log_info "Installing Neovim via APT (may be older version)..."
                 sudo apt install -y neovim
             fi
-            sudo apt install -y tmux git curl
-        elif command -v yum >/dev/null 2>&1; then
-            sudo yum install -y neovim tmux git curl
-        elif command -v dnf >/dev/null 2>&1; then
-            sudo dnf install -y neovim tmux git curl
+            sudo apt install -y tmux git curl unzip fontconfig
         elif command -v pacman >/dev/null 2>&1; then
-            sudo pacman -S --noconfirm neovim tmux git curl
+            sudo pacman -S --noconfirm neovim tmux git curl unzip fontconfig
         else
             log_error "Unsupported Linux distribution"
             exit 1

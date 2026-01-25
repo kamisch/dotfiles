@@ -10,7 +10,7 @@ echo "🚀 Starting Oh My Zsh installation..."
 # Check if running on macOS or Linux
 if [[ "$OSTYPE" == "darwin"* ]]; then
     OS="mac"
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+elif [[ "$OSTYPE" == "linux-gnu"* ]] || [[ "$OSTYPE" == "linux-musl"* ]] || [[ -f /etc/alpine-release ]]; then
     OS="linux"
 else
     echo "❌ Unsupported operating system: $OSTYPE"
@@ -31,14 +31,18 @@ if ! command -v zsh &> /dev/null; then
         fi
     elif [[ "$OS" == "linux" ]]; then
         # Detect package manager and install zsh
-        if command -v apt-get &> /dev/null; then
-            sudo apt-get update && sudo apt-get install -y zsh
+        if command -v dnf &> /dev/null; then
+            # Fedora / RHEL 8+ / CentOS Stream
+            sudo dnf install -y zsh util-linux-user
         elif command -v yum &> /dev/null; then
+            # Older RHEL / CentOS 7
             sudo yum install -y zsh
-        elif command -v dnf &> /dev/null; then
-            sudo dnf install -y zsh
+        elif command -v apt-get &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y zsh
         elif command -v pacman &> /dev/null; then
             sudo pacman -S --noconfirm zsh
+        elif command -v apk &> /dev/null; then
+            sudo apk add zsh
         else
             echo "❌ No supported package manager found. Please install zsh manually."
             exit 1

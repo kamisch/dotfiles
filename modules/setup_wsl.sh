@@ -65,7 +65,15 @@ install_win32yank() {
     log_info "Extracting win32yank.exe..."
     if ! command -v unzip >/dev/null 2>&1; then
         log_info "Installing unzip..."
-        sudo apt update && sudo apt install -y unzip
+        if command -v dnf >/dev/null 2>&1; then
+            sudo dnf install -y unzip
+        elif command -v yum >/dev/null 2>&1; then
+            sudo yum install -y unzip
+        elif command -v apt >/dev/null 2>&1; then
+            sudo apt update && sudo apt install -y unzip
+        elif command -v pacman >/dev/null 2>&1; then
+            sudo pacman -S --noconfirm unzip
+        fi
     fi
     
     if ! unzip -p "$zip_file" win32yank.exe > "$temp_dir/win32yank.exe"; then

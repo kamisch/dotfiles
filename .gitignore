@@ -38,3 +38,6 @@ Thumbs.db
 # Test artifacts
 .config-test-backup-*
 test-results/
+
+# Claude plugin marketplaces (external git repos)
+modules/config/claude/plugins/marketplaces/

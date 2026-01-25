@@ -10,7 +10,7 @@ echo "🚀 Starting NVM and NPM setup..."
 # Check if running on macOS or Linux
 if [[ "$OSTYPE" == "darwin"* ]]; then
     OS="mac"
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+elif [[ "$OSTYPE" == "linux-gnu"* ]] || [[ "$OSTYPE" == "linux-musl"* ]] || [[ -f /etc/alpine-release ]]; then
     OS="linux"
 else
     echo "❌ Unsupported operating system: $OSTYPE"
@@ -29,17 +29,21 @@ if [[ "$OS" == "mac" ]]; then
     fi
 elif [[ "$OS" == "linux" ]]; then
     # Install curl and build essentials if not present
-    if command -v apt-get &> /dev/null; then
-        sudo apt-get update
-        sudo apt-get install -y curl build-essential libssl-dev
-    elif command -v yum &> /dev/null; then
-        sudo yum groupinstall -y "Development Tools"
-        sudo yum install -y curl openssl-devel
-    elif command -v dnf &> /dev/null; then
+    if command -v dnf &> /dev/null; then
+        # Fedora / RHEL 8+ / CentOS Stream
         sudo dnf groupinstall -y "Development Tools"
         sudo dnf install -y curl openssl-devel
+    elif command -v yum &> /dev/null; then
+        # Older RHEL / CentOS 7
+        sudo yum groupinstall -y "Development Tools"
+        sudo yum install -y curl openssl-devel
+    elif command -v apt-get &> /dev/null; then
+        sudo apt-get update
+        sudo apt-get install -y curl build-essential libssl-dev
     elif command -v pacman &> /dev/null; then
         sudo pacman -S --noconfirm curl base-devel openssl
+    elif command -v apk &> /dev/null; then
+        sudo apk add curl build-base openssl-dev
     fi
 fi
 

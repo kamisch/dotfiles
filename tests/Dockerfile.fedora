@@ -1,7 +1,7 @@
-FROM alpine:latest
+FROM fedora:40
 
 # Install basic dependencies
-RUN apk add --no-cache \
+RUN dnf install -y \
     sudo \
     curl \
     git \
@@ -9,12 +9,13 @@ RUN apk add --no-cache \
     zsh \
     rsync \
     diffutils \
-    shadow \
+    util-linux-user \
     unzip \
-    fontconfig
+    fontconfig \
+    && dnf clean all
 
 # Create a test user with sudo privileges
-RUN adduser -D -s /bin/bash testuser && \
+RUN useradd -m -s /bin/bash testuser && \
     echo "testuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Create shell config files for testing

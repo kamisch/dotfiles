@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y \
     zsh \
     rsync \
     diffutils \
+    unzip \
+    fontconfig \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a test user with sudo privileges
@@ -32,6 +34,6 @@ COPY --chown=testuser:testuser . /home/testuser/dotfiles
 WORKDIR /home/testuser/dotfiles
 
 # Make scripts executable
-RUN chmod +x setup.sh sync.sh
+RUN chmod +x modules/*.sh tests/*.sh
 
 CMD ["/bin/bash"]

@@ -34,6 +34,7 @@ show_help() {
     echo "Options:"
     echo "  --ubuntu     Test on Ubuntu 22.04 (default)"
     echo "  --alpine     Test on Alpine Linux"
+    echo "  --fedora     Test on Fedora Linux"
     echo "  --all        Test on all environments"
     echo "  --local      Test on local environment (no Docker)"
     echo "  --clean      Clean up test containers and images"
@@ -41,6 +42,7 @@ show_help() {
     echo ""
     echo "Examples:"
     echo "  $0                # Test on Ubuntu"
+    echo "  $0 --fedora       # Test on Fedora"
     echo "  $0 --all          # Test on all environments"
     echo "  $0 --local        # Test locally"
     echo "  $0 --clean        # Clean up Docker resources"
@@ -77,16 +79,32 @@ test_ubuntu() {
 
 test_alpine() {
     log_info "Testing on Alpine Linux..."
-    
+
     # Build Docker image
     docker build -f tests/Dockerfile.alpine -t dotfiles-test-alpine .
-    
+
     # Run tests
     if docker run --rm --name dotfiles-test-alpine dotfiles-test-alpine /home/testuser/dotfiles/tests/test-suite.sh; then
         log_success "Alpine tests passed"
         return 0
     else
         log_error "Alpine tests failed"
+        return 1
+    fi
+}
+
+test_fedora() {
+    log_info "Testing on Fedora Linux..."
+
+    # Build Docker image
+    docker build -f tests/Dockerfile.fedora -t dotfiles-test-fedora .
+
+    # Run tests
+    if docker run --rm --name dotfiles-test-fedora dotfiles-test-fedora /home/testuser/dotfiles/tests/test-suite.sh; then
+        log_success "Fedora tests passed"
+        return 0
+    else
+        log_error "Fedora tests failed"
         return 1
     fi
 }
@@ -132,13 +150,15 @@ test_local() {
 
 test_all() {
     log_info "Running tests on all environments..."
-    
+
     local ubuntu_result=0
     local alpine_result=0
-    
+    local fedora_result=0
+
     test_ubuntu || ubuntu_result=1
     test_alpine || alpine_result=1
-    
+    test_fedora || fedora_result=1
+
     echo ""
     log_info "Test Results Summary:"
     if [[ $ubuntu_result -eq 0 ]]; then
@@ -146,14 +166,20 @@ test_all() {
     else
         echo -e "  Ubuntu: ${RED}FAILED${NC}"
     fi
-    
+
     if [[ $alpine_result -eq 0 ]]; then
         echo -e "  Alpine: ${GREEN}PASSED${NC}"
     else
         echo -e "  Alpine: ${RED}FAILED${NC}"
     fi
-    
-    if [[ $ubuntu_result -eq 0 && $alpine_result -eq 0 ]]; then
+
+    if [[ $fedora_result -eq 0 ]]; then
+        echo -e "  Fedora: ${GREEN}PASSED${NC}"
+    else
+        echo -e "  Fedora: ${RED}FAILED${NC}"
+    fi
+
+    if [[ $ubuntu_result -eq 0 && $alpine_result -eq 0 && $fedora_result -eq 0 ]]; then
         log_success "All environment tests passed!"
         return 0
     else
@@ -185,6 +211,9 @@ main() {
             ;;
         --alpine)
             check_docker && test_alpine
+            ;;
+        --fedora)
+            check_docker && test_fedora
             ;;
         --all)
             check_docker && test_all
