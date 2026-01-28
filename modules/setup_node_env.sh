@@ -30,12 +30,17 @@ if [[ "$OS" == "mac" ]]; then
 elif [[ "$OS" == "linux" ]]; then
     # Install curl and build essentials if not present
     if command -v dnf &> /dev/null; then
-        # Fedora / RHEL 8+ / CentOS Stream (dnf5 uses 'group install' not 'groupinstall')
-        sudo dnf group install -y "Development Tools" || sudo dnf groupinstall -y "Development Tools"
+        # Fedora / RHEL 8+ / CentOS Stream
+        # dnf5 uses 'group install' and lowercase group names; dnf4 uses 'groupinstall'
+        sudo dnf group install -y development-tools 2>/dev/null \
+            || sudo dnf group install -y "Development Tools" 2>/dev/null \
+            || sudo dnf groupinstall -y "Development Tools" 2>/dev/null \
+            || sudo dnf install -y gcc gcc-c++ make
         sudo dnf install -y curl openssl-devel
     elif command -v yum &> /dev/null; then
         # Older RHEL / CentOS 7
-        sudo yum group install -y "Development Tools" || sudo yum groupinstall -y "Development Tools"
+        sudo yum groupinstall -y "Development Tools" 2>/dev/null \
+            || sudo yum install -y gcc gcc-c++ make
         sudo yum install -y curl openssl-devel
     elif command -v apt-get &> /dev/null; then
         sudo apt-get update
