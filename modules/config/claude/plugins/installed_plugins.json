@@ -1,0 +1,49 @@
+{
+  "version": 2,
+  "plugins": {
+    "full-stack-development@claude-code-workflows": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kamisch/.claude/plugins/cache/claude-code-workflows/full-stack-development/unknown",
+        "version": "unknown",
+        "installedAt": "2025-10-24T00:18:43.576Z",
+        "lastUpdated": "2025-10-24T00:18:43.576Z",
+        "gitCommitSha": "1072d9278eda815f1af676c31e234980e83e22bd",
+        "isLocal": true
+      }
+    ],
+    "database-operations@claude-code-workflows": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kamisch/.claude/plugins/cache/claude-code-workflows/database-operations/unknown",
+        "version": "unknown",
+        "installedAt": "2025-10-24T00:18:43.576Z",
+        "lastUpdated": "2025-10-24T00:18:43.576Z",
+        "gitCommitSha": "1072d9278eda815f1af676c31e234980e83e22bd",
+        "isLocal": true
+      }
+    ],
+    "example-skills@anthropic-agent-skills": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kamisch/.claude/plugins/cache/anthropic-agent-skills/example-skills/unknown",
+        "version": "unknown",
+        "installedAt": "2025-10-24T00:18:43.576Z",
+        "lastUpdated": "2025-10-24T00:18:43.576Z",
+        "gitCommitSha": "c74d647e56e6daa12029b6acb11a821348ad044b",
+        "isLocal": true
+      }
+    ],
+    "document-skills@anthropic-agent-skills": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kamisch/.claude/plugins/cache/anthropic-agent-skills/document-skills/unknown",
+        "version": "unknown",
+        "installedAt": "2025-10-24T00:22:40.157Z",
+        "lastUpdated": "2025-10-24T00:22:40.157Z",
+        "gitCommitSha": "c74d647e56e6daa12029b6acb11a821348ad044b",
+        "isLocal": true
+      }
+    ]
+  }
+}

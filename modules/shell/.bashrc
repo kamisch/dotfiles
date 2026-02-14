@@ -168,3 +168,6 @@ export PATH="/snap/bin:$PATH"
 export PATH="$PATH:/Users/kamisch/.cache/lm-studio/bin"
 # End of LM Studio CLI section
 
+
+# Added by Ralph installer
+export PATH="$PATH:/Users/kamisch/.ralph/bin"

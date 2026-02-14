@@ -105,3 +105,9 @@ export PATH=/Users/kamisch/.opencode/bin:$PATH
 export PATH="$PATH:/Users/kamisch/.cache/lm-studio/bin"
 # End of LM Studio CLI section
 
+
+# Added by Antigravity
+export PATH="/Users/kamisch/.antigravity/antigravity/bin:$PATH"
+
+# Added by Ralph installer
+export PATH="$PATH:/Users/kamisch/.ralph/bin"
