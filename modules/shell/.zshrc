@@ -111,3 +111,16 @@ export PATH="/Users/kamisch/.antigravity/antigravity/bin:$PATH"
 
 # Added by Ralph installer
 export PATH="$PATH:/Users/kamisch/.ralph/bin"
+
+  #
+  # ┌──────────┬──────────────────────────────┐
+  # │ Shortcut │            Action            │
+  # ├──────────┼──────────────────────────────┤
+  # │ Ctrl+R   │ Fuzzy search command history │
+  # ├──────────┼──────────────────────────────┤
+  # │ Ctrl+T   │ Fuzzy insert a file path     │
+  # ├──────────┼──────────────────────────────┤
+  # │ Alt+C    │ Fuzzy cd into a directory    │
+  # └──────────┴──────────────────────────────┘
+  #
+source <(fzf --zsh)
