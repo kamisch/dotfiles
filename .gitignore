@@ -41,3 +41,4 @@ test-results/
 
 # Claude plugin marketplaces (external git repos)
 modules/config/claude/plugins/marketplaces/
+modules/config/claude/plugins/known_marketplaces.json

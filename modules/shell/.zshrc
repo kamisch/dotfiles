@@ -46,13 +46,12 @@ setopt HIST_IGNORE_ALL_DUPS
 setopt HIST_FIND_NO_DUPS
 setopt HIST_SAVE_NO_DUPS
 
-# NVM configuration
+# Use nvim as default vim
+alias vim=nvim
+
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-# NPM global packages
-export PATH="$HOME/.npm-global/bin:$PATH"
 
 # NPM aliases and shortcuts
 alias npi='npm install'
@@ -88,39 +87,3 @@ if command -v yarn &> /dev/null; then
     alias yb='yarn build'
     alias yu='yarn upgrade'
 fi
-
-# Use nvim as default vim
-alias vim=nvim
-
-# Snap binaries PATH
-export PATH="/snap/bin:$PATH"
-
-# Add local bin
-export PATH="$HOME/.local/bin:$PATH"
-
-# opencode
-export PATH=/Users/kamisch/.opencode/bin:$PATH
-
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/kamisch/.cache/lm-studio/bin"
-# End of LM Studio CLI section
-
-
-# Added by Antigravity
-export PATH="/Users/kamisch/.antigravity/antigravity/bin:$PATH"
-
-# Added by Ralph installer
-export PATH="$PATH:/Users/kamisch/.ralph/bin"
-
-  #
-  # ┌──────────┬──────────────────────────────┐
-  # │ Shortcut │            Action            │
-  # ├──────────┼──────────────────────────────┤
-  # │ Ctrl+R   │ Fuzzy search command history │
-  # ├──────────┼──────────────────────────────┤
-  # │ Ctrl+T   │ Fuzzy insert a file path     │
-  # ├──────────┼──────────────────────────────┤
-  # │ Alt+C    │ Fuzzy cd into a directory    │
-  # └──────────┴──────────────────────────────┘
-  #
-source <(fzf --zsh)
