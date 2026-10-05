@@ -148,6 +148,9 @@ sync_to_repo() {
                 # Exclude marketplaces - they contain git repos and are reinstallable from known_marketplaces.json
                 rsync -av --delete --exclude='marketplaces' "$CLAUDE_CONFIG_DIR/plugins/" "$SCRIPT_DIR/config/claude/plugins/"
             fi
+            if [[ -d "$CLAUDE_CONFIG_DIR/hooks" ]]; then
+                rsync -av --delete "$CLAUDE_CONFIG_DIR/hooks/" "$SCRIPT_DIR/config/claude/hooks/"
+            fi
 
             log_success "claude config synced"
         else
@@ -285,6 +288,14 @@ sync_from_repo() {
                 # Exclude marketplaces - they contain git repos and are reinstallable from known_marketplaces.json
                 # Using --ignore-existing to preserve locally installed marketplace plugins
                 rsync -av --ignore-existing --exclude='marketplaces' "$SCRIPT_DIR/config/claude/plugins/" "$CLAUDE_CONFIG_DIR/plugins/"
+            fi
+            if [[ -d "$SCRIPT_DIR/config/claude/hooks" ]]; then
+                rsync -av "$SCRIPT_DIR/config/claude/hooks/" "$CLAUDE_CONFIG_DIR/hooks/"
+                # Register hooks/settings.json into settings.json (machine-specific, not synced); unique keeps re-runs idempotent
+                local settings="$CLAUDE_CONFIG_DIR/settings.json"
+                [[ -f "$settings" ]] || echo '{}' > "$settings"
+                jq -s '.[1].hooks as $h | .[0] | .hooks = reduce ($h | keys[]) as $e (.hooks // {}; .[$e] = ((.[$e] // []) + $h[$e] | unique))' \
+                    "$settings" "$SCRIPT_DIR/config/claude/hooks/settings.json" > "$settings.tmp" && mv "$settings.tmp" "$settings"
             fi
 
             log_success "claude config synced from repo"
@@ -443,7 +454,7 @@ show_help() {
     echo "Configurations:"
     echo "  • nvim   - Neovim config directory"
     echo "  • tmux   - Tmux config directory"
-    echo "  • claude - Claude config directory (settings, commands, plugins)"
+    echo "  • claude - Claude config directory (settings, commands, plugins, hooks)"
     echo "  • zsh    - .zshrc file"
     echo "  • bash   - .bashrc file"
     echo ""
